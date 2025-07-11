@@ -7,7 +7,7 @@ import { io, userSocketMap } from "../server.js";
 export const getUsersForSidebar = async (req, res) => {
   try {
     const userId = req.user._id;
-    const filteredUser = await User.find({ _id: { $notEqual: userId } }).select(
+    const filteredUser = await User.find({ _id: {$ne: userId } }).select(
       "-password"
     );
 
@@ -26,7 +26,7 @@ export const getUsersForSidebar = async (req, res) => {
     await Promise.all(promises);
     res.json({ success: true, users: filteredUser, unseenMessages });
   } catch (error) {
-    console.log(error.messages);
+    console.log(error.message);
     res.json({ success: false, messages: error.messages });
   }
 };

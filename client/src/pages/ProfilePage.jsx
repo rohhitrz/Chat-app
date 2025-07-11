@@ -1,16 +1,32 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets";
+import { AuthContext } from "../../context/AuthContext";
 
 const ProfilePage = () => {
+  const { authUser, updateProfile } = useContext(AuthContext);
   const [selectedImage, setSelectedImage] = useState(null);
+  const navigate = useNavigate();
+  const [name, setName] = useState(authUser.fullName);
+  const [bio, setBio] = useState(authUser.bio);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/");
+    if (!selectedImage) {
+      await updateProfile({ fullName: name, bio });
+      navigate("/");
+      return;
+    }
+
+    const render = new FileReader();
+    render.readAsDataURL(selectedImage);
+    render.onload = async () => {
+      const base64Image = render.result();
+      await updateProfile({ profilePic: base64Image, fullName: name, bio });
+      navigate("/");
+    };
   };
-  const navigate = useNavigate();
-  const [name, setName] = useState("user");
-  const [bio, setBio] = useState("");
+
   return (
     <div className="min-h-screen bg-cover bg-no-repeat flex items-center justify-center">
       <div
@@ -52,14 +68,14 @@ const ProfilePage = () => {
             className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
 
-          <textArea
+          <textarea
             onChange={(e) => setBio(e.target.value)}
             value={bio}
-            placeholder="write your bio..."
+           
             required
             className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
             rows={4}
-          ></textArea>
+          ></textarea>
           <button
             type="submit"
             className="py-3 bg-gradient-to-r from bg-purple-400 to-violet-600
@@ -69,8 +85,8 @@ const ProfilePage = () => {
           </button>
         </form>
         <img
-          className="max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10"
-          src={assets.logo_icon}
+          className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10 ${selectedImage && "rounded-full"}`}
+          src={ authUser?.profilePic || assets.logo_icon}
           alt=""
         />
       </div>

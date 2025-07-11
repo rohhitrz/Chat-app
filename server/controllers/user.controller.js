@@ -5,13 +5,13 @@ import bcrypt from "bcryptjs";
 
 //------------------------signup user------------------------------
 export const Signup = async (req, res) => {
-  const { fulName, email, password, bio } = req.body;
+  const { fullName, email, password, bio } = req.body;
 
   try {
-    if (!fulName || !email || !password || !bio) {
+    if (!fullName || !email || !password || !bio) {
       return res.json({ success: false, message: "missing Details" });
     }
-    const user = await User.findone({ email });
+    const user = await User.findOne({ email });
     if (user) {
       return res.json({ success: false, message: "user already exists" });
     }
@@ -20,7 +20,7 @@ export const Signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      fulName,
+      fullName,
       email,
       password: hashedPassword,
       bio,
@@ -45,8 +45,8 @@ export const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const userData = await User.findone({ email });
-    if (userData) {
+    const userData = await User.findOne({ email });
+    if (!userData) {
       res.json({
         success: false,
         message: "user does not exist, please register",
@@ -82,7 +82,7 @@ export const checkAuth = (req, res) => {
 
 //controller to update user profile details
 
-export const updateProfile = async () => {
+export const updateProfile = async (req, res) => {
   try {
     const { profilePic, bio, fullName } = req.body;
 

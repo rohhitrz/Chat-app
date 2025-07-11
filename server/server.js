@@ -18,6 +18,7 @@ export const io = new Server(server, {
   cors: { origin: "*" },
 });
 
+//store online user
 export const userSocketMap = {}; //{userId:socketId}
 
 //socket.io connection handler
@@ -28,6 +29,7 @@ io.on("connection", (socket) => {
 
   if (userId) {
     userSocketMap[userId] = socket.id;
+    console.log("if user id is available then user socket map is", userSocketMap)
   }
 
   //emit online users to all connected clients
@@ -36,7 +38,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("user disconnected", userId);
     delete userSocketMap[userId];
-    io.emit("getOnlineUser", Object.keys(userSocketMap));
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
 
