@@ -11,7 +11,7 @@ function App() {
 
 
   return (
-    <div className="bg-[url('./src/assets/bgImage.svg')]">
+    <div className="bg-black bg-contain">
       <Toaster/>
       <Routes>
         <Route path="/" element={authUser?<HomePage />:<Navigate to="/login" />} />
