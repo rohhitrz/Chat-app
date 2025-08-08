@@ -48,6 +48,19 @@ app.use(cors());
 app.use("/api/status", (req, res) => {
   res.send("server is live");
 });
+
+// root route (helps Vercel preview not show "Cannot GET /")
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Chat API is running",
+    routes: {
+      status: "/api/status",
+      auth: "/api/auth/*",
+      messages: "/api/messages/*",
+    },
+  });
+});
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
