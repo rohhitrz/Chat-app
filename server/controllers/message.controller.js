@@ -34,7 +34,7 @@ export const getUsersForSidebar = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { id: selectedUserId } = req.params;
-    const myId = req.user_id;
+    const myId = req.user._id;
 
     const messages = await Message.find({
       $or: [
@@ -50,7 +50,7 @@ export const getMessages = async (req, res) => {
     res.json({ success: true, messages });
   } catch (error) {
     console.log(error.message);
-    res.json({ success: true, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -65,7 +65,7 @@ export const markMessageAsSeen = async (req, res) => {
     });
   } catch (error) {
     console.log(error.message);
-    res.json({ success: true, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -77,17 +77,24 @@ export const sendMessage = async (req, res) => {
     const receiverId = req.params.id;
     const senderId = req.user._id;
 
+    console.log("Received message data:", { text: !!text, image: !!image, receiverId, senderId });
+
     let imageUrl;
     if (image) {
+      console.log("Uploading image to cloudinary...");
       const uploadResonse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResonse.secure_url;
+      console.log("Image uploaded successfully:", imageUrl);
     }
+    
     const newMessage = await Message.create({
       senderId,
       receiverId,
       text,
       image: imageUrl,
     });
+
+    console.log("Message created:", newMessage);
 
     //emit the new message to receiver's socket
     const receiverSocketId = userSocketMap[receiverId];
@@ -97,7 +104,7 @@ export const sendMessage = async (req, res) => {
 
     res.json({ success: true, newMessage });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: true, message: error.message });
+    console.log("Error in sendMessage:", error.message);
+    res.json({ success: false, message: error.message });
   }
 };

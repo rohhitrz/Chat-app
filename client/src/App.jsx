@@ -11,7 +11,7 @@ function App() {
 
 
   return (
-    <div className="bg-black bg-contain">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <Toaster/>
       <Routes>
         <Route path="/" element={authUser?<HomePage />:<Navigate to="/login" />} />

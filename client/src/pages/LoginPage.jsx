@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { motion } from "framer-motion";
 import assets from "../assets/assets";
 import { AuthContext } from "../../context/AuthContext";
 
@@ -27,25 +28,49 @@ const LoginPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center flex items-center justify-center gap-8 
-    sm:justify-evenly max-sm:flex-col backdrop-blur-2xl"
+      className="relative min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center gap-4 sm:gap-8 sm:justify-evenly max-sm:flex-col p-4 overflow-hidden"
+      style={{ perspective: 1200 }}
     >
+      {/* Animated background accents */}
+      <motion.div
+        className="pointer-events-none absolute -top-10 -left-10 w-80 h-80 rounded-full bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 blur-3xl"
+        initial={{ opacity: 0, x: -80, y: -80 }}
+        animate={{ opacity: 1, x: [0, -20, 0], y: [0, 20, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="pointer-events-none absolute -bottom-10 -right-10 w-96 h-96 rounded-full bg-gradient-to-tr from-fuchsia-500/20 to-purple-500/20 blur-3xl"
+        initial={{ opacity: 0, x: 80, y: 80 }}
+        animate={{ opacity: 1, x: [0, 20, 0], y: [0, -20, 0] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
+
       {/* -----------------------left-------------------------- */}
-      <img src={assets.logo_big} alt="" className="w-[min(30vw,250px)]" />
+      <motion.img
+        src={assets.logo_big}
+        alt=""
+        className="w-[min(25vw,200px)] sm:w-[min(30vw,250px)] float-animation"
+        initial={{ x: -100, opacity: 0, rotateY: -30 }}
+        animate={{ x: 0, opacity: 1, rotateY: 0 }}
+        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+      />
       {/* -----------------------Right-------------------------- */}
-      <form
+      <motion.form
         onSubmit={handleSubmit}
-        className="border-2 bg-white/8 text-white border-gray-500 p-6 flex
-      flex-col gap-6 rounded-lg shadow-lg"
+        className="border glass-effect text-white border-gray-700 p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 rounded-2xl shadow-2xl w-full max-w-md"
+        initial={{ x: 100, opacity: 0, rotateY: 15 }}
+        animate={{ x: 0, opacity: 1, rotateY: 0 }}
+        whileHover={{ rotateX: -3, rotateY: 4, scale: 1.02 }}
+        transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 120 }}
       >
-        <h2 className="font-medium text-2xl flex justify-between items-center">
+        <h2 className="font-medium text-xl sm:text-2xl flex justify-between items-center">
           {currentState}
           {isDataSubmitted && (
             <img
               onClick={() => setIsDataSubmitted(false)}
               src={assets.arrow_icon}
               alt=""
-              className="w-5 cursor-pointer"
+              className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
             />
           )}
         </h2>
@@ -93,21 +118,20 @@ const LoginPage = () => {
         )}
 
         <button
-          type="subit"
-          className="py-3 bg-gradient-to-r from bg-purple-400 to-violet-600
-         text-white rounded-md cursor-pointer"
+          type="submit"
+          className="py-2 sm:py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold rounded-md cursor-pointer text-sm sm:text-base shadow-lg hover:shadow-emerald-500/20"
         >
           {currentState === "Sign up" ? "Create Account" : "Login Now"}
         </button>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
           <input type="checkbox" />
           <p>Agree to the terms of use & privacy Policy.</p>
         </div>
 
         <div className="flex flex-col gap-2">
           {currentState === "Sign up" ? (
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600 text-center">
               Already Have an Account{" "}
               <span
                 onClick={() => {
@@ -120,7 +144,7 @@ const LoginPage = () => {
               </span>
             </p>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600 text-center">
               Create An Account{" "}
               <span
                 onClick={() => {
@@ -133,7 +157,7 @@ const LoginPage = () => {
             </p>
           )}
         </div>
-      </form>
+      </motion.form>
     </div>
   );
 };

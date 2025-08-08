@@ -87,10 +87,14 @@ export const AuthProvider = ({ children }) => {
     });
   };
   useEffect(() => {
+    // Only attach auth header and call checkAuth when we actually have a token
     if (token) {
       axios.defaults.headers.common["token"] = token;
+      checkAuth();
+    } else {
+      // Ensure no stale header remains which can cause 401 with confusing toasts
+      delete axios.defaults.headers.common["token"];
     }
-    checkAuth();
   }, []);
 
   const value = {

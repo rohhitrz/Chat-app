@@ -47,14 +47,14 @@ export const Login = async (req, res) => {
 
     const userData = await User.findOne({ email });
     if (!userData) {
-      res.json({
+      return res.json({
         success: false,
         message: "user does not exist, please register",
       });
     }
-    const isPasswordCorrect = bcrypt.compare(password, userData.password);
+    const isPasswordCorrect = await bcrypt.compare(password, userData.password);
     if (userData && !isPasswordCorrect) {
-      res.json({ success: false, message: "Email or Password is wrong" });
+      return res.json({ success: false, message: "Email or Password is wrong" });
     }
     const token = generateToken(userData._id);
     res.json({

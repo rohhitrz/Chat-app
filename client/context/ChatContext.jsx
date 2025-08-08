@@ -47,17 +47,20 @@ export const ChatProvider = ({ children }) => {
 
   const sendMessage = async (messageData) => {
     try {
+      console.log("Sending message data:", messageData);
       const { data } = await axios.post(
         `/api/messages/send/${selectedUser._id}`,
         messageData
       );
+      console.log("Server response:", data);
       if (data.success) {
         setMessages((prevMessages) => [...prevMessages, data.newMessage]);
       } else {
-        toast.error(data.messages);
+        toast.error(data.message || data.messages);
       }
     } catch (error) {
-      toast.error(error.messages);
+      console.error("Error sending message:", error);
+      toast.error(error.response?.data?.message || error.message || "Failed to send message");
     }
   };
   //function to subscribe to message for selected user
