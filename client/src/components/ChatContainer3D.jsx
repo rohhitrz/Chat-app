@@ -30,6 +30,7 @@ const ChatContainer3D = () => {
     useContext(ChatContext);
   const { authUser, onlineUsers } = useContext(AuthContext);
   const scrollEnd = useRef();
+  const fileInputRef = useRef(null);
   const [input, setInput] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -88,38 +89,53 @@ const ChatContainer3D = () => {
     }
   };
 
-  // Handle file upload
+  // Handle image upload (clip button or drag & drop)
   const handleFileUpload = async (file) => {
     if (!file) return;
-    
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    // 4mb server limit; warn early
+    const maxBytes = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxBytes) {
+      toast.error("Image is larger than 4MB");
+      return;
+    }
+
     try {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        await sendMessage({ 
-          file: {
-            name: file.name,
-            type: file.type,
-            data: reader.result
-          }
-        });
+        await sendMessage({ image: reader.result });
+        toast.success("Image sent");
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      toast.error("Failed to upload file");
+      toast.error("Failed to send image");
     }
+  };
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
   };
 
   // Handle drag and drop
   const handleDrop = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    const imageFiles = files.filter(file => file.type.startsWith("image/"));
-    
-    if (imageFiles.length > 0) {
-      await handleFileUpload(imageFiles[0]);
-      toast.success("Image uploaded successfully!");
+
+    // Prefer files list; if empty (e.g., screenshot from clipboard), fall back to items
+    let file = e.dataTransfer.files?.[0];
+    if (!file && e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      const item = Array.from(e.dataTransfer.items).find((it) => it.kind === "file");
+      if (item) file = item.getAsFile();
+    }
+
+    if (file && file.type?.startsWith("image/")) {
+      await handleFileUpload(file);
+    } else {
+      toast.error("Please drop an image file");
     }
   };
 
@@ -456,11 +472,19 @@ const ChatContainer3D = () => {
       >
         <div className="flex items-center gap-3">
           <motion.button
+            onClick={handleFileButtonClick}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="p-3 rounded-full bg-gray-700/50 hover:bg-gray-600/50"
           >
             <Paperclip className="w-5 h-5 text-white" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e.target.files?.[0])}
+              className="hidden"
+            />
           </motion.button>
           
           <motion.button

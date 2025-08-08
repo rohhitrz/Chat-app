@@ -12,6 +12,16 @@ export const ChatProvider = ({ children }) => {
 
   const { socket, axios } = useContext(AuthContext);
 
+  // Avoid duplicate message entries (first-message duplication, double listeners, etc.)
+  const addMessageIfNew = (incomingMessage) => {
+    setMessages((prev) => {
+      if (!incomingMessage?._id) return prev;
+      const alreadyExists = prev.some((m) => m._id === incomingMessage._id);
+      if (alreadyExists) return prev;
+      return [...prev, incomingMessage];
+    });
+  };
+
   //function to get all users for sidebar
 
   const getUsers = async () => {
@@ -54,7 +64,7 @@ export const ChatProvider = ({ children }) => {
       );
       console.log("Server response:", data);
       if (data.success) {
-        setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+        addMessageIfNew(data.newMessage);
       } else {
         toast.error(data.message || data.messages);
       }
@@ -66,10 +76,11 @@ export const ChatProvider = ({ children }) => {
   //function to subscribe to message for selected user
   const subscribeToMessages = async () => {
     if (!socket) return;
+    socket.off("newMessage"); // ensure a single active listener
     socket.on("newMessage", (newMessage) => {
       if (selectedUser && newMessage.senderId === selectedUser._id) {
         newMessage.seen = true;
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        addMessageIfNew(newMessage);
         axios.put(`/api/messages/mark/${newMessage._id}`);
       } else {
         setUnseenMessages((prevUnseenMessages) => ({
